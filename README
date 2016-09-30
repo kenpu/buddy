@@ -1,3 +1,13 @@
+KEN's comments
+
+# sudo apt-get install libtool
+# sudo apt-get install automake
+cd ./buddy
+autoreconf -ivf
+./configure
+make
+
+
 ==========================================================================
                               *** BuDDy ***
                          Binary Decision Diagrams
