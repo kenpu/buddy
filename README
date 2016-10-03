@@ -1,11 +1,25 @@
-KEN's comments
+##To Setup:
 
-# sudo apt-get install libtool
-# sudo apt-get install automake
-cd ./buddy
+In the buddy folder
+
+```
+sudo apt-get install libtool
+sudo apt-get install automake
 autoreconf -ivf
 ./configure
 make
+
+```
+
+##To compile and run a BDD:
+
+Add the buddy/bin folder to your path, and run the following command from whichever directory.
+
+```
+compbdd <filename.cpp>
+./<filename>
+
+```
 
 
 ==========================================================================
