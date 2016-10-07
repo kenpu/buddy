@@ -10,72 +10,75 @@
 
 using namespace std;
 
-/**
- * Returns true if the current bucket is at or below the bucket capacity.
- *
- * items - array of bvecs to check
- * length - lengths of items
- * bucket - the current bucket we are checking for capacity
- * bucket_capacity - maximum capacity allowed for buckets
- **/
-bdd is_below_capacity(bvec *items, int length, int bucket, int bucket_capacity) {
-    bdd c = bddtrue;
-    bvec count = bvec_con((items[0]).bitnum(), 0);
-    for (int i = 0; i < length; i++) {
-        bvec item = items[i];
-        bvec bucket_vec = bvec_con(item.bitnum(), bucket);
-        if (bddtrue == bvec_equ(bucket_vec, item)) {
-            count++;
-        }
-    }
-    if (count <= bucket_capacity) {
-        return bddtrue;
-    } else {
-        return bddfalse;
-    }
-}
-
 int main(int argc, char **argv) {
 
     bdd_init(10000, 10000);
 
-    int X = 2; //Number of unique items
+    int X = 2;  //Number of unique items
     int Y = 2;  //Number of buckets
-    int Z = 2;  //Bucket capacity
+    int Z = 1;  //Bucket capacity
 
-    int domains[X];
+    int domains[X*Y];
 
-    fill_n(domains, X, Y);
+    fill_n(domains, X*Y, 100);
 
-    fdd_extdomain(domains, X);
+    fdd_extdomain(domains, X*Y);
 
-    //Create list of bvec items
-    bvec *items = new bvec[X];
-
-    for (int i = 0; i < X; i++) {
-        items[i] = bvec_varfdd(i); 
-    }
-
-    //Create bucket conditions
-    bdd *conditions = new bdd[Y];
+    //Create a matrix of bvec items
     
-    for (int i = 0; i < Y; i++) {
-        conditions[i] = is_below_capacity(items, X, i, Z);
+    bvec **items = new bvec *[X];
+    for(int i=0; i < X; i++)
+        items[i] = new bvec[Y];
+
+    for (int i = 0; i < X; i++)
+        for(int j=0; j < Y; j++)
+            items[i][j] = bvec_varfdd(i * Y + j); 
+
+    int nbits = items[0][0].bitnum();
+    bvec one = bvec_con(nbits, 1);
+
+    // bucket size bvec
+
+    bvec *sizes = new bvec[Y];
+
+    for(int j=0; j < Y; j++) {
+        sizes[j] = items[0][j];
+        for(int i = 1; i < X; i++)
+            sizes[j] = sizes[j] + items[i][j];
     }
 
-    bdd c = bddtrue;
+    // bucket count bvec
 
-    for (int i = 0; i < Y; i++) {
-        c &= conditions[i];
+    bvec *counts = new bvec[X];
+
+    for(int i=0; i < X; i++) {
+        counts[i] = items[i][0];
+        for(int j=1; j < Y; j++)
+            counts[i] = counts[i] + items[i][j];
     }
+
+    // all counts are = 1
+    bdd c1 = bddtrue;
+    for(int i = 0; i < X; i++) {
+        c1 &= (counts[i] == one);
+    }
+
+    // all sizes are <= Z
+    bdd c2 = bddtrue;
+    for(int j=0; j < Y; j++)
+        c2 &= bvec_lte(sizes[j], bvec_con(nbits, Z));
+
+    // items[i][j] <= 1
+    bdd c3 = bddtrue;
+    for(int i=0; i < X; i++)
+        for(int j=0; j < Y; j++)
+            c3 &= bvec_lte(items[i][j], bvec_con(nbits, 1));
+
+    bdd c = c1 & c2 & c3;
 
     printf("# of solutions is: %ld\n", (long)bdd_satcount(c));
 
     cout << fddset << c << endl;
-
-    //Cleanup
-    delete [] items;
-    delete [] conditions;
 
     return 0;
 }
