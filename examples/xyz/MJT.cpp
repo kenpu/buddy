@@ -30,17 +30,19 @@ bdd neighbour(bvec x, bvec y) {
 int main() {
     bdd_init(100000, 100000);
     int N = 3;
-    int domains[N] = {4, 4, 4};
-    fdd_extdomain(domains, N);
+    int domains[3] = {400, 400, 400};
+    fdd_extdomain(domains, 3);
 
     bvec P1 = bvec_varfdd(0);
     bvec P2 = bvec_varfdd(1);
     bvec P3 = bvec_varfdd(2);
     // bvec P4 = bvec_varfdd(3);
     // bvec P5 = bvec_varfdd(4);
+    
+    printf("test bvec val: %d\n", bvec_val(P3));
 
     // bvec everyone[N] = {P1, P2, P3, P4, P5};
-    bvec everyone[N] = {P1, P2, P3};
+    bvec everyone[3] = {P1, P2, P3};
 
     bdd C1 = alldistinct(everyone, N);
     bdd C2 = neighbour(P1, P2);
