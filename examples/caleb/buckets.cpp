@@ -15,8 +15,8 @@ int main(int argc, char **argv) {
     bdd_init(10000000, 10000000);
 
     int X = 10;  //Number of unique items
-    int Y = 7;  //Number of buckets
-    int Z = 2;  //Bucket capacity
+    int Y = 10;  //Number of buckets
+    int Z = 1;  //Bucket capacity
 
     int domains[X*Y];
 

@@ -10,4 +10,4 @@ bdd_dir=$(dirname "$( cd "$( dirname "${BASH_SOURCE[0]}"  )" && pwd  )")
 
 output_file=$(echo $1 | cut -f 1 -d '.')
 
-g++ -I . -I $bdd_dir/src/ -o $output_file $1 $bdd_dir/src/.libs/libbdd.a -lm
+g++ -I . -I $bdd_dir/src/ -o $output_file.out $1 $bdd_dir/src/.libs/libbdd.a -lm
