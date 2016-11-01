@@ -12,11 +12,15 @@ using namespace std;
 
 int main(int argc, char **argv) {
 
-    bdd_init(10000000, 10000000);
+    int node_num = 1000000;
+    int cache_size = 1000000;
+    int num_bits = 2;
+
+    bdd_init(node_num, cache_size);
 
     int X = 10;  //Number of unique items
     int Y = 10;  //Number of buckets
-    int Z = 1;  //Bucket capacity
+    int Z = 2;  //Bucket capacity
 
     int domains[X*Y];
 
@@ -35,16 +39,15 @@ int main(int argc, char **argv) {
             items[i][j] = bvec_varfdd(i * Y + j); 
 
     int n = items[0][0].bitnum();
-    int N = 5;
 
     // bucket size bvec
 
     bvec *sizes = new bvec[Y];
 
     for(int j=0; j < Y; j++) {
-        sizes[j] = bvec_coerce(N, items[0][j]);
+        sizes[j] = bvec_coerce(num_bits, items[0][j]);
         for(int i = 1; i < X; i++)
-            sizes[j] = sizes[j] + bvec_coerce(N, items[i][j]);
+            sizes[j] = sizes[j] + bvec_coerce(num_bits, items[i][j]);
     }
 
     // bucket count bvec
@@ -52,14 +55,14 @@ int main(int argc, char **argv) {
     bvec *counts = new bvec[X];
 
     for(int i=0; i < X; i++) {
-        counts[i] = bvec_coerce(N, items[i][0]);
+        counts[i] = bvec_coerce(num_bits, items[i][0]);
         for(int j=1; j < Y; j++)
-            counts[i] = counts[i] + bvec_coerce(N, items[i][j]);
+            counts[i] = counts[i] + bvec_coerce(num_bits, items[i][j]);
     }
 
     // all counts are = 1
     bdd c1 = bddtrue;
-    bvec one = bvec_con(N, 1);
+    bvec one = bvec_con(num_bits, 1);
     for(int i = 0; i < X; i++) {
         c1 &= (counts[i] == one);
     }
@@ -67,14 +70,14 @@ int main(int argc, char **argv) {
     // all sizes are <= Z
     bdd c2 = bddtrue;
     for(int j=0; j < Y; j++)
-        c2 &= bvec_lte(sizes[j], bvec_con(N, Z));
+        c2 &= bvec_lte(sizes[j], bvec_con(num_bits, Z));
 
     bdd c = c1 & c2;
 
     printf("# of solutions is: %ld\n", (long)bdd_satcount(c));
 
-    // cout << fddset << c << endl;
-    bdd sol = bdd_satone(c);
+    //cout << bddset << c << endl;
+    //bdd sol = bdd_satone(c);
 
     return 0;
 }
