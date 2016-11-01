@@ -35,13 +35,17 @@ int main() {
         bdd x = bdd_imp((iequ & jequ), bvec_lte(items[i], items[j]));
         c2 &= x;
     }
+
+    bvec two = bvec_con(items[3].bitnum(), 2);
+    bdd c3 = bvec_equ(items[3], two);
     
 
-    bdd c = c1 & c2;
+    bdd c = c1 & c2 & c3;
 
-    printf("Number of satisfying arguments: %f", bdd_satcount(c));
+    printf("Number of satisfying arguments: %f \n", bdd_satcount(c));
 
-    //cout << fddset << bdd_fullsatone(c) << endl;
+    cout << fddset << bdd_fullsatone(c) << endl;
+
 
     bdd_done();
 
