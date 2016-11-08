@@ -1,53 +1,55 @@
-
+/**
+ * Describe a function where:
+ *
+ * Domain {0, 1, 2, 3, 4, 5}
+ * Range {0, 1, 2}
+ *
+ * where forall(i, j) 
+ *     f(i) == 1 & f(j) == 2 -> i <= j
+ */
 
 #include "fdd.h"
 #include "bvec.h"
 
 using namespace std;
 
+const int D = 6; //Domain Size
+const int R = 3; //Range Size
+
 int main() {
 
     bdd_init(1000000, 1000000);
 
-    int D = 6;
-    int R = 3;
+    int domains[D];
 
-    int domain[6] = {3, 3, 3, 3, 3, 3};
+    fill_n(domains, D, R);
+    
+    fdd_extdomain(domains, D);
 
-    fdd_extdomain(domain, D);
+    bvec *outputs = new bvec[D];
 
-    bvec *items = new bvec[D];
-    for (int i = 0; i < D; i++)
-        items[i] = bvec_varfdd(i);
-
-    //first item cannot be 0 (a)
-    bvec zero = bvec_con(items[0].bitnum(), 0);
-    bdd c1 = bvec_neq(items[0], zero);
-
-    //(i = 1) and (j = 2) => i < j
-    bdd c2 = bddtrue; 
-    for (int i = 0; i < D - 1; i++) {
-        int j = i + 1;
-        bvec one = bvec_con(items[i].bitnum(), 1);
-        bvec two = bvec_con(items[j].bitnum(), 2);
-        bdd iequ = bvec_equ(items[i], one);
-        bdd jequ = bvec_equ(items[j], two);
-        bdd x = bdd_imp((iequ & jequ), bvec_lte(items[i], items[j]));
-        c2 &= x;
+    for (int i = 0; i < D; i++) {
+        outputs[i] = bvec_varfdd(i);
     }
 
-    bvec two = bvec_con(items[3].bitnum(), 2);
-    bdd c3 = bvec_equ(items[3], two);
-    
+    //All outputs must be 2 or less
+    bdd c1 = bddtrue;
+    bvec two = bvec_con(outputs[0].bitnum(), 2);
+    for (int i = 0; i < D; i++) {
+        c1 &= bvec_lte(outputs[i], two);
+    }
 
-    bdd c = c1 & c2 & c3;
+    //Every output must be less than or equal to the next
+    bdd c2 = bddtrue;
+    for (int i = 0; i < D - 1; i++) {
+        for (int j = i + 1; j < D; j++) {
+            c2 &= bvec_lte(outputs[i], outputs[j]);
+        }
+    }
 
-    printf("Number of satisfying arguments: %f \n", bdd_satcount(c));
+    bdd c = c1 & c2;
 
-    cout << fddset << bdd_fullsatone(c) << endl;
-
-
-    bdd_done();
+    cout << fddset << c << endl;
 
     return 0;
 }
