@@ -31,30 +31,27 @@ int main() {
 
     bvec x = bvec_varfdd(0);
     bvec i = bvec_varfdd(1);
+    bdd iset = fdd_ithset(1);
 
     int x_bits = x.bitnum();
     int i_bits = i.bitnum();
 
-    //Create constants
     bvec hundred = bvec_con(x_bits, 100);
     bvec five = bvec_con(i_bits, 5);
-    bvec one = bvec_con(i_bits, 1);
+    bvec two = bvec_con(i_bits, 2);
 
     bdd c1 = x < hundred;
 
-    bdd c2 = (i < five) & (i >= one);
+    bdd c2 = (i < five) & (i >= two);
 
     bvec mod = bvec_mod(x, i);
     bvec zero = bvec_con(mod.bitnum(), 0);
 
     bdd c3 = bvec_equ(mod, zero);
 
-
     bdd c4 = bdd_imp(c2, c3);
 
-    bdd c = c1 & c2 & c4;
-
-    //bdd c = bdd_forall(c2, c4);
+    bdd c = c1 & bdd_forall(c4, iset);
 
 
     cout << fddset << c << endl;
